@@ -30,6 +30,8 @@ add_library(
     ava_compiler
     STATIC
         src/source.c
+        src/diagnostic.c
+        src/source_diagnostic.c
 )
 
 target_include_directories(
@@ -63,6 +65,45 @@ ava_configure_c_target(ava)
 include(CTest)
 
 if(BUILD_TESTING)
+    add_executable(
+        ava_diagnostic_test
+        tests/diagnostic_test.c
+    )
+
+    target_link_libraries(
+        ava_diagnostic_test
+        PRIVATE
+            ava_compiler
+    )
+
+    ava_configure_c_target(ava_diagnostic_test)
+
+    add_test(
+        NAME diagnostic_render
+        COMMAND
+            ava_diagnostic_test
+    )
+
+    add_executable(
+        ava_source_diagnostic_test
+        tests/source_diagnostic_test.c
+    )
+
+    target_link_libraries(
+        ava_source_diagnostic_test
+        PRIVATE
+            ava_compiler
+    )
+
+    ava_configure_c_target(ava_source_diagnostic_test)
+
+    add_test(
+        NAME source_diagnostic
+        COMMAND
+            ava_source_diagnostic_test
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/missing.ava"
+    )
+
     add_executable(
         ava_source_test
         tests/source_test.c
