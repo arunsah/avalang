@@ -6,15 +6,50 @@ project(
     LANGUAGES C
 )
 
+function(ava_configure_c_target target_name)
+    target_compile_features(
+        ${target_name}
+        PRIVATE
+            c_std_17
+    )
+
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+        target_compile_options(
+            ${target_name}
+            PRIVATE
+                -Wall
+                -Wextra
+                -Wpedantic
+                -Wconversion
+                -Wshadow
+        )
+    endif()
+endfunction()
+
+add_library(
+    ava_compiler
+    STATIC
+        src/source.c
+)
+
+target_include_directories(
+    ava_compiler
+    PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+)
+
+ava_configure_c_target(ava_compiler)
+
 add_executable(
     ava
     src/main.c
+    src/cli.c
 )
 
-target_compile_features(
+target_link_libraries(
     ava
     PRIVATE
-        c_std_17
+        ava_compiler
 )
 
 target_compile_definitions(
@@ -23,21 +58,33 @@ target_compile_definitions(
         AVA_VERSION="${PROJECT_VERSION}"
 )
 
-if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
-    target_compile_options(
-        ava
-        PRIVATE
-            -Wall
-            -Wextra
-            -Wpedantic
-            -Wconversion
-            -Wshadow
-    )
-endif()
+ava_configure_c_target(ava)
 
 include(CTest)
 
 if(BUILD_TESTING)
+    add_executable(
+        ava_source_test
+        tests/source_test.c
+    )
+
+    target_link_libraries(
+        ava_source_test
+        PRIVATE
+            ava_compiler
+    )
+
+    ava_configure_c_target(ava_source_test)
+
+    add_test(
+        NAME source_load
+        COMMAND
+            ava_source_test
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/empty.ava"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/basic.ava"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/missing.ava"
+    )
+
     add_test(
         NAME cli_help
         COMMAND ava --help
