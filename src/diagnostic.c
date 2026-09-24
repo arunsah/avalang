@@ -29,8 +29,24 @@ bool ava_diagnostic_render(FILE *stream, const AvaDiagnostic *diagnostic) {
         return false;
     }
 
+    if ((diagnostic->line == 0) != (diagnostic->column == 0)) {
+        return false;
+    }
+
     if (has_text(diagnostic->path)) {
-        if (fprintf(stream, "%s: ", diagnostic->path) < 0) {
+        if (fprintf(stream, "%s:", diagnostic->path) < 0) {
+            return false;
+        }
+    }
+
+    if (diagnostic->line != 0) {
+        if (fprintf(stream, "%zu:%zu:", diagnostic->line, diagnostic->column) < 0) {
+            return false;
+        }
+    }
+
+    if (has_text(diagnostic->path) || diagnostic->line != 0) {
+        if (fputc(' ', stream) == EOF) {
             return false;
         }
     }

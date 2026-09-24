@@ -1,9 +1,18 @@
 #ifndef AVA_SOURCE_H
 #define AVA_SOURCE_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #define AVA_SOURCE_MAX_BYTES ((size_t)64 * 1024U * 1024U) // 64 MiB
+
+/**
+ * Represents a half-open byte range [start, end) in a source file.
+ */
+typedef struct {
+    size_t start;
+    size_t end;
+} AvaSpan;
 
 /**
  * Represents an empty or loaded source file.
@@ -46,5 +55,13 @@ AvaSourceLoadResult ava_source_load(const char *path, AvaSource *source);
  * Passing NULL or disposing an empty source is allowed.
  */
 void ava_source_dispose(AvaSource *source);
+
+/**
+ * Converts a source byte offset to a one-based line and byte column.
+ *
+ * The offset may equal source->length, which locates EOF.
+ * Returns false for invalid arguments or an offset beyond the source.
+ */
+bool ava_source_location(const AvaSource *source, size_t offset, size_t *line, size_t *column);
 
 #endif

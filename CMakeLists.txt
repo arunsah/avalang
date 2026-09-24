@@ -32,6 +32,10 @@ add_library(
         src/source.c
         src/diagnostic.c
         src/source_diagnostic.c
+        src/token.c
+        src/lexer.c
+        src/lexer_diagnostic.c
+        src/token_dump.c
 )
 
 target_include_directories(
@@ -65,6 +69,72 @@ ava_configure_c_target(ava)
 include(CTest)
 
 if(BUILD_TESTING)
+    add_executable(
+        ava_lexer_pipeline_test
+        tests/lexer_pipeline_test.c
+    )
+
+    target_link_libraries(
+        ava_lexer_pipeline_test
+        PRIVATE
+            ava_compiler
+    )
+
+    ava_configure_c_target(ava_lexer_pipeline_test)
+
+    add_test(
+        NAME lexer_pipeline
+        COMMAND
+            ava_lexer_pipeline_test
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/declaration.ava"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/invalid_character.ava"
+    )
+
+    add_test(
+        NAME cli_dump_tokens
+        COMMAND ava dump tokens "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/declaration.ava"
+    )
+
+    set_tests_properties(
+        cli_dump_tokens
+        PROPERTIES
+            PASS_REGULAR_EXPRESSION "identifier"
+    )
+
+    add_test(
+        NAME cli_dump_invalid_character
+        COMMAND ava dump tokens "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/invalid_character.ava"
+    )
+
+    add_test(
+        NAME cli_dump_missing_file
+        COMMAND ava dump tokens "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/missing.ava"
+    )
+
+    set_tests_properties(
+        cli_dump_invalid_character cli_dump_missing_file
+        PROPERTIES
+            WILL_FAIL TRUE
+    )
+
+    add_executable(
+        ava_lexer_test
+        tests/lexer_test.c
+    )
+
+    target_link_libraries(
+        ava_lexer_test
+        PRIVATE
+            ava_compiler
+    )
+
+    ava_configure_c_target(ava_lexer_test)
+
+    add_test(
+        NAME lexer
+        COMMAND ava_lexer_test
+    )
+
     add_executable(
         ava_diagnostic_test
         tests/diagnostic_test.c

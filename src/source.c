@@ -128,3 +128,26 @@ void ava_source_dispose(AvaSource *source) {
 
     *source = (AvaSource){0};
 }
+
+bool ava_source_location(const AvaSource *source, size_t offset, size_t *line, size_t *column) {
+    if (source == NULL || source->bytes == NULL || line == NULL || column == NULL ||
+        offset > source->length) {
+        return false;
+    }
+
+    size_t current_line = 1;
+    size_t current_column = 1;
+
+    for (size_t index = 0; index < offset; index += 1) {
+        if (source->bytes[index] == '\n') {
+            current_line += 1;
+            current_column = 1;
+        } else {
+            current_column += 1;
+        }
+    }
+
+    *line = current_line;
+    *column = current_column;
+    return true;
+}

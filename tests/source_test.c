@@ -127,6 +127,31 @@ static void test_loaded_destination(const char *basic_path) {
     ava_source_dispose(&source);
 }
 
+static void test_source_location(void) {
+    char text[] = "let x\n42";
+    AvaSource source = {
+        .bytes = text,
+        .length = sizeof(text) - 1,
+    };
+    size_t line = 0;
+    size_t column = 0;
+
+    CHECK(ava_source_location(&source, 0, &line, &column));
+    CHECK(line == 1 && column == 1);
+
+    CHECK(ava_source_location(&source, 4, &line, &column));
+    CHECK(line == 1 && column == 5);
+
+    CHECK(ava_source_location(&source, 6, &line, &column));
+    CHECK(line == 2 && column == 1);
+
+    CHECK(ava_source_location(&source, source.length, &line, &column));
+    CHECK(line == 2 && column == 3);
+
+    CHECK(!ava_source_location(&source, source.length + 1, &line, &column));
+    CHECK(!ava_source_location(NULL, 0, &line, &column));
+}
+
 int main(int argc, char **argv) {
     if (argc != 4) {
         fprintf(stderr, "usage: %s <empty-source> <basic-source> <missing-source>\n", argv[0]);
@@ -138,6 +163,8 @@ int main(int argc, char **argv) {
     test_basic_source(argv[2]);       // <basic-source>
     test_missing_source(argv[3]);     // <missing-source>
     test_loaded_destination(argv[2]); // <basic-source>
+
+    test_source_location();
 
     if (failure_count != 0) {
         fprintf(stderr, "%d source test(s) failed\n", failure_count);

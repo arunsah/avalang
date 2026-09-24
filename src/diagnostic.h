@@ -2,6 +2,7 @@
 #define AVA_DIAGNOSTIC_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 
 /**
@@ -19,6 +20,9 @@ typedef enum {
  * All strings are borrowed (owns no memory) and must remain valid until
  * the diagnostic has been rendered. Code and message are required.
  * Path, reason and help are optional and may be NULL.
+ *
+ * Line and column are one-based; both are zero when there is no source
+ * location.
  */
 typedef struct {
     AvaDiagnosticSeverity severity;
@@ -27,6 +31,8 @@ typedef struct {
     const char *path;
     const char *reason;
     const char *help;
+    size_t line;
+    size_t column;
 } AvaDiagnostic;
 
 /**

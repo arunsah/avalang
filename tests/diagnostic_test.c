@@ -91,6 +91,20 @@ static void test_error_with_all_fields(void) {
                  "help: check that the path exists and is readable\n");
 }
 
+static void test_error_with_location(void) {
+    AvaDiagnostic diagnostic = {
+        .severity = AVA_DIAGNOSTIC_ERROR,
+        .code = "AVA_LEX_UNEXPECTED_CHARACTER",
+        .message = "unexpected character",
+        .path = "program.ava",
+        .line = 2,
+        .column = 5,
+    };
+
+    check_output(&diagnostic,
+                 "program.ava:2:5: error[AVA_LEX_UNEXPECTED_CHARACTER]: unexpected character\n");
+}
+
 static void test_warning_without_path_or_reason(void) {
     AvaDiagnostic diagnostic = {
         .severity = AVA_DIAGNOSTIC_WARNING,
@@ -152,10 +166,19 @@ static void test_invalid_diagnostics(void) {
     diagnostic.message = "example error";
     diagnostic.severity = (AvaDiagnosticSeverity)99;
     check_rejected(&diagnostic);
+
+    diagnostic.severity = AVA_DIAGNOSTIC_ERROR;
+    diagnostic.line = 2;
+    check_rejected(&diagnostic);
+
+    diagnostic.line = 0;
+    diagnostic.column = 5;
+    check_rejected(&diagnostic);
 }
 
 int main(void) {
     test_error_with_all_fields();
+    test_error_with_location();
     test_warning_without_path_or_reason();
     test_note();
     test_empty_optional_fields();
