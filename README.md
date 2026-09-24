@@ -8,7 +8,19 @@ The name Ava is inspired by Ava, the artificial intelligence in *Ex Machina*. Th
 
 ## Status
 
-AvaLang is at an early stage. The current work is focused on building the smallest end-to-end implementation from first principles.
+AvaLang is at an early stage. The compiler can read a source file and dump its tokens or a
+small syntax tree for `let` bindings with integer literal initializers. It does not execute
+programs yet.
+
+```sh
+make
+./build/ava dump tokens tests/fixtures/bindings.ava
+./build/ava dump ast tests/fixtures/bindings.ava
+```
+
+The current parser accepts `let name = 42` and `let name: i32 = 42` forms. The type name and
+integer literal are recorded as source text; type checking and numeric range checking have
+not been added.
 
 ## License
 

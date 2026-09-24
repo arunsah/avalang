@@ -36,6 +36,10 @@ add_library(
         src/lexer.c
         src/lexer_diagnostic.c
         src/token_dump.c
+        src/ast.c
+        src/parser.c
+        src/parser_diagnostic.c
+        src/ast_dump.c
 )
 
 target_include_directories(
@@ -69,6 +73,46 @@ ava_configure_c_target(ava)
 include(CTest)
 
 if(BUILD_TESTING)
+    add_executable(
+        ava_parser_test
+        tests/parser_test.c
+    )
+
+    target_link_libraries(
+        ava_parser_test
+        PRIVATE
+            ava_compiler
+    )
+
+    ava_configure_c_target(ava_parser_test)
+
+    add_test(
+        NAME parser
+        COMMAND ava_parser_test
+    )
+
+    add_test(
+        NAME cli_dump_ast
+        COMMAND ava dump ast "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/bindings.ava"
+    )
+
+    set_tests_properties(
+        cli_dump_ast
+        PROPERTIES
+            PASS_REGULAR_EXPRESSION "integer"
+    )
+
+    add_test(
+        NAME cli_dump_ast_missing_type
+        COMMAND ava dump ast "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/missing_type.ava"
+    )
+
+    set_tests_properties(
+        cli_dump_ast_missing_type
+        PROPERTIES
+            WILL_FAIL TRUE
+    )
+
     add_executable(
         ava_lexer_pipeline_test
         tests/lexer_pipeline_test.c

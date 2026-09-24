@@ -1,0 +1,2 @@
+let answer: i32 = 42
+let next = 7
